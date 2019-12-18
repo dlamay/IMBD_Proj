@@ -1,0 +1,890 @@
+---
+title: "Statistical Computing Preliminary Report"
+author: "Jeffrey Covaleski and Danielle LaMay"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+## Part a: Summary Statistics and Graphs
+
+```{r,echo=FALSE}
+imdb = read.csv("imdb.csv")
+# See how many missing values there are
+na.imdb = na.omit(imdb)
+imdb= na.imdb
+```
+```{r, echo=FALSE}
+summary(imdb[,3:12])
+```
+
+Here we have the summary statistics for each of the non-Genre based variables after we ommitted observations with missing values. At the beginning of the data, we had 11,072 observations, but after removing those with missing values, we are left with 10,463, which is still a substanital sample size.
+
+After observing the 5-Number Summary of these variables, we decided to plot the histogram of some of these variables.  We chose imdbRating because it seemed to have a spread out distribution that may be normal, especially after considering the Central Limit Theorem.  This was important because this seems to be our best choice of variables to use as the response, with a subset of the other variables used to predict the imdb Rating.  We chose duration because of the massive range that it has between the minimum (2) and the maximum (46200) and we wanted a closer look at the distribution that is associated with this variable.  ratingCount was chosen becuse it seems like a variable that seems to be a good predictor of rating, given that ratingCount is the sample size used to calculate imdbRating.  Like duration, there is an enormous range associated with this variable and we wanted to see how skewed the distribution really is visually.  Finally, we chose to look at the distribution of year to see how the movie-making industry has changed over time.  This could be important in predicting because earlier films might not be as known to the public as contemporary films, which could influence the rating and the number of rates.
+
+To look at the distributions, we decided to plot the histograms of these four variables and created an abline of their means, since a histogram does not show the mean otherwise:
+
+```{r, echo=FALSE, fig1, fig.height=4, fig.width=5}
+attach(imdb)
+par(mfrow = c(2,2))
+hist(imdbRating)
+abline(v=mean(imdbRating), col="red", lwd=2)
+hist(duration)
+abline(v=mean(duration), col = "red", lwd=2)
+hist(ratingCount)
+abline(v=mean(ratingCount), col = "red", lwd = 2)
+hist(year)
+abline(v=mean(year), col = "red", lwd=2)
+detach(imdb)
+```
+
+As expected the distribution of imdbRating is pretty normal, with a slight left skew.  I'm sure a test for normality will be conducted at some point in the final report.  duration has a very right skewed distribution, where there are a couple of extremely influential points that an outlier test would show to be outliers.  The same case is with ratingCount, it is extremely right skewed and there are simply a few movies that were rated considerably more than the majority of other mvoies.  Year was perhaps the most interesting distribution.  It shows the growth of the movie making industry as it really began to expand in the 1980's and 1990's before reaching its pinnacle in the 2000's.  I would imagine that the reason there is a decline in the last break of the histogram because the max value of year is 2014, so this data does not include movies made in the second half of the decade.
+
+We then wanted to look at the relationships between some of these variables by plotting them on a scatterplot.
+
+```{r, echo=FALSE, fig2, fig.height=3.5, fig.width=6}
+par(mfrow=c(2,2))
+attach(imdb)
+plot(ratingCount,imdbRating, xlab = "# of Rates", ylab = "IMDB Rating", main = "Rating Count vs. IMDB Rating")
+plot(year, imdbRating, xlab = "Year", ylab = "IMDB Rating", main= "Year vs. IMDB Rating")
+plot(duration,imdbRating, xlab= "Duration", ylab = "IMDB Rating", main = "Duration vs. IMDB Rating")
+plot(year,ratingCount, xlab = "Year", ylab= "Rating Count", main= "Year vs. Rating Count")
+detach(imdb)
+```
+
+The plot of the Rating Count against the IMDB rating seems to have a relationship where there are movies with good and bad ratings that have few reviews, but it seems that only very good movies have lots of ratings.
+
+The plot of the Year vs. the IMDB rating shows that early movies are traditionally rated as good, but as time goes on, modern movies have greater variability in how they are rated.
+
+The plot of the duration of the movie vs. the IMDB rating shows that most movies with a duration under 15,000 seconds have great variability amongst the rating, but the few movies that have very long durations are rated well.
+
+Finally, the plot of year vs. the Rating Count shows that movies as time goes on, movies that are made more recently are rated more often than movies that were one of the first movies ever made.
+
+After performing all of these plots and summary of these 10 variables, we then create several different subsets of the variables based on genre.  For each of the 27 genres, we created a separate data frame where it includes all observations that have a "1" in the variable associated with a particular genre.  We then plotted violin plots of the imdbRating of each of these genres in order to look at both the histogram and the boxplot of each genre separately:
+
+```{r, echo=FALSE}
+action.imdb = imdb[imdb$Action == 1,]
+#summary(action.imdb[,3:10])
+
+adult.imdb = imdb[imdb$Adult == 1,]
+#summary(adult.imdb[,3:10])
+
+adventure.imdb = imdb[imdb$Adventure == 1,]
+#summary(adventure.imdb[,3:10])
+
+animation.imdb = imdb[imdb$Animation == 1,]
+#summary(animation.imdb[,3:10])
+
+biography.imdb = imdb[imdb$Biography == 1,]
+#summary(biography.imdb[,3:10])
+
+comedy.imdb = imdb[imdb$Comedy == 1,]
+#summary(comedy.imdb[,3:10])
+
+crime.imdb = imdb[imdb$Crime == 1,]
+#summary(crime.imdb[,3:10])
+
+documentary.imdb = imdb[imdb$Documentary == 1,]
+#summary(documentary.imdb[,3:10])
+
+drama.imdb = imdb[imdb$Drama == 1,]
+#summary(drama.imdb[,3:10])
+
+family.imdb = imdb[imdb$Family == 1,]
+#summary(family.imdb[,3:10])
+
+fantasy.imdb = imdb[imdb$Fantasy == 1,]
+#summary(fantasy.imdb[,3:10])
+
+filmnoir.imdb = imdb[imdb$FilmNoir == 1,]
+#summary(filmnoir.imdb[,3:10])
+
+gameshow.imdb = imdb[imdb$GameShow == 1,]
+#summary(gameshow.imdb[,3:10])
+
+history.imdb = imdb[imdb$History == 1,]
+#summary(history.imdb[,3:10])
+
+horror.imdb = imdb[imdb$Horror == 1,]
+#summary(horror.imdb[,3:10])
+
+music.imdb = imdb[imdb$Music == 1,]
+#summary(music.imdb[,3:10])
+
+musical.imdb = imdb[imdb$Musical == 1,]
+#summary(musical.imdb[,3:10])
+
+mystery.imdb = imdb[imdb$Mystery == 1,]
+#summary(mystery.imdb[,3:10])
+
+news.imdb = imdb[imdb$News == 1,]
+#summary(news.imdb[,3:10])
+
+realitytv.imdb = imdb[imdb$RealityTV == 1,]
+#summary(realitytv.imdb[,3:10])
+
+romance.imdb = imdb[imdb$Romance == 1,]
+#summary(romance.imdb[,3:10])
+
+scifi.imdb = imdb[imdb$SciFi == 1,]
+#summary(scifi.imdb[,3:10])
+
+short.imdb = imdb[imdb$Short == 1,]
+#summary(short.imdb[,3:10])
+
+sport.imdb = imdb[imdb$Sport == 1,]
+#summary(sport.imdb[,3:10])
+
+talkshow.imdb = imdb[imdb$TalkShow == 1,]
+#summary(talkshow.imdb[,3:10])
+
+thriller.imdb = imdb[imdb$Thriller == 1,]
+#summary(thriller.imdb[,3:10])
+
+war.imdb = imdb[imdb$War == 1,]
+#summary(war.imdb[,3:10])
+
+western.imdb = imdb[imdb$Western == 1,]
+#summary(western.imdb[,3:10])
+
+```
+
+```{r, echo=FALSE, fig4, fig.height = 2.5, message = FALSE, warning = FALSE}
+library(vioplot)
+vioplot(action.imdb$imdbRating, adult.imdb$imdbRating, adventure.imdb$imdbRating, biography.imdb$imdbRating, comedy.imdb$imdbRating, crime.imdb$imdbRating, names = c("Action", "Adult", "Adventure", "Bio.", "Comedy", "Crime"), col = 2:7, xlab= "Genre", ylab = "IMDB Rating", main = "Genre vs. Rating")
+```
+
+By these plots, it seems that Action, Adventure, Biography, Comedy and Crime are pretty normally distributed with Adult being mediocrely rated with more likely to be rated poorly.
+
+```{r, echo = FALSE, fig5, fig.height = 2.5}
+vioplot(documentary.imdb$imdbRating, drama.imdb$imdbRating, family.imdb$imdbRating, fantasy.imdb$imdbRating, filmnoir.imdb$imdbRating, gameshow.imdb$imdbRating, names = c("Doc.", "Drama", "Family", "Fantasy", "Film Noir", "Game"), col = 2:7, xlab= "Genre", ylab = "IMDB Rating", main = "Genre vs. Rating")
+```
+
+Documentary, Drama, Family and Fantasy are all mostly normal, but each of them have more low ratings than high ratings.  Film Noir and Game Show seem symmetrically distributed, but their ranges of ratings are very small.
+
+```{r, echo=FALSE, fig6, fig.height = 2.5}
+vioplot(history.imdb$imdbRating, horror.imdb$imdbRating, music.imdb$imdbRating, musical.imdb$imdbRating, mystery.imdb$imdbRating, news.imdb$imdbRating, realitytv.imdb$imdbRating, names = c("Hist.", "Horror", "Music", "Musical", "Myst.", "News", "Real. TV"), col = 2:8, xlab= "Genre", ylab = "IMDB Rating", main = "Genre vs. Rating")
+```
+
+Horror, News, and Reality TV are all symmetrical, but News and Reality TV have very narrow ranges History, Music, Musical and Mystery are close, but all have more lower ratings than higher.
+
+```{r, echo=FALSE, fig7, fig.height = 2.5}
+vioplot(romance.imdb$imdbRating, scifi.imdb$imdbRating, short.imdb$imdbRating, sport.imdb$imdbRating, talkshow.imdb$imdbRating, thriller.imdb$imdbRating, war.imdb$imdbRating, western.imdb$imdbRating, names = c("Rom.", "SciFi", "Short", "Sport", "Talk", "Thriller", "War", "Western") ,col = 2:9, xlab= "Genre", ylab = "IMDB Rating", main = "Genre vs. Rating")
+```
+
+Short, Sport, Talk, War, and Western are all symmetric with Talk, War and Western have very small ranges.  Like many of these other genres, Romance, Sci Fi, Sport, Thriller are mostly symmetric with more lower ratings than higher ratings.
+
+***
+
+## Part b: Scienfic Questions
+
+#### Regression
+
+One question that we are interested in is to see which variables we can predict the number of wins any particular movie has.  We could start off with a full model of all of the quantitative predictors and then fit smaller models and compare them via AIC or Adjusted-R^2.  
+
+Another Regression question we could answer is to determine which variables are important in predicting the number of awards that a movie wins.  Like the other regression problem, we could compare the full model with the subset models via AIC or Adjusted-R^2.
+
+#### Independence
+
+We could conduct several Chi-Sq Tests for Independence or Fisher's Exact Test in order to determine if certain genres are independent of one another.  We are able to use a Chi-Sq Test in any case where the count in each cell is greater than 5, and then we can use the Fisher's Exact Test with any two-way table where this is not the case.
+
+##### ANOVA
+
+We could take a look at the the mean imdbRating that is grouped by the different types of Genres.  Then we could look at the TukeyHSD to determine exactly which genres have a different average imdbRating
+
+#### Classification
+
+We could divide the imdbRating variable into three different categories: "Bad", "Average", "Great" and the see which predictors are significant in predicting the probability that a given movie falls into a particular category.
+
+We could compare the results from the second regression problem where we looked at predictions of how many wins a movie will achieve, but instead use Poisson regression so this way the results will be counts instead of a continuous variable.  It would be interesting to see if there are any differences in the two methods.
+
+***
+
+## Part c: Code
+
+```{r, eval = FALSE}
+imdb = read.csv("imdb.csv")
+dim(imdb)
+
+# See how many missing values there are
+na.imdb = na.omit(imdb)
+dim(na.imdb)
+
+imdb= na.imdb
+summary(imdb[,3:12])
+
+#Histogram of imdbRating, duration, ratingCount,
+# year
+attach(imdb)
+par(mfrow = c(2,2))
+hist(imdbRating)
+abline(v=mean(imdbRating), col="red")
+hist(duration)
+abline(v=mean(duration), col = "red")
+hist(ratingCount)
+abline(v=mean(ratingCount), col = "red")
+hist(year)
+abline(v=mean(year), col = "red")
+
+# Scatterplots of two variables at a time
+par(mfrow=c(2,2))
+plot(ratingCount,imdbRating, xlab = "# of Rates", ylab = "IMDB Rating")
+plot(year, imdbRating, xlab = "Year", ylab = "IMDB Rating")
+plot(duration,imdbRating, xlab= "Duration", ylab = "IMDB Rating")
+plot(year,ratingCount, xlab = "Year", ylab= "Rating Count")
+
+#by genre
+action.imdb = imdb[imdb$Action == 1,]
+adult.imdb = imdb[imdb$Adult == 1,]
+adventure.imdb = imdb[imdb$Adventure == 1,]
+animation.imdb = imdb[imdb$Animation == 1,]
+biography.imdb = imdb[imdb$Biography == 1,]
+comedy.imdb = imdb[imdb$Comedy == 1,]
+crime.imdb = imdb[imdb$Crime == 1,]
+documentary.imdb = imdb[imdb$Documentary == 1,]
+drama.imdb = imdb[imdb$Drama == 1,]
+family.imdb = imdb[imdb$Family == 1,]
+fantasy.imdb = imdb[imdb$Fantasy == 1,]
+filmnoir.imdb = imdb[imdb$FilmNoir == 1,]
+gameshow.imdb = imdb[imdb$GameShow == 1,]
+history.imdb = imdb[imdb$History == 1,]
+horror.imdb = imdb[imdb$Horror == 1,]
+music.imdb = imdb[imdb$Music == 1,]
+musical.imdb = imdb[imdb$Musical == 1,]
+mystery.imdb = imdb[imdb$Mystery == 1,]
+news.imdb = imdb[imdb$News == 1,]
+realitytv.imdb = imdb[imdb$RealityTV == 1,]
+romance.imdb = imdb[imdb$Romance == 1,]
+scifi.imdb = imdb[imdb$SciFi == 1,]
+short.imdb = imdb[imdb$Short == 1,]
+sport.imdb = imdb[imdb$Sport == 1,]
+talkshow.imdb = imdb[imdb$TalkShow == 1,]
+thriller.imdb = imdb[imdb$Thriller == 1,]
+war.imdb = imdb[imdb$War == 1,]
+western.imdb = imdb[imdb$Western == 1,]
+
+# Violin plots of imdbRating by genre
+library(vioplot)
+par(mfrow=c(1,1))
+vioplot(action.imdb$imdbRating, adult.imdb$imdbRating, adventure.imdb$imdbRating, biography.imdb$imdbRating, comedy.imdb$imdbRating, crime.imdb$imdbRating, names = c("Action", "Adult", "Adventure", "Biography", "Comedy", "Crime"), col = 2:7, xlab= "Genre", ylab = "IMDB Rating", main = "Genre vs. Rating")
+vioplot(documentary.imdb$imdbRating, drama.imdb$imdbRating, family.imdb$imdbRating, fantasy.imdb$imdbRating, filmnoir.imdb$imdbRating, gameshow.imdb$imdbRating, names = c("Documentary", "Drama", "Family", "Fantasy", "Film Noir", "Game Show"), col = 2:7, xlab= "Genre", ylab = "IMDB Rating", main = "Genre vs. Rating")
+vioplot(history.imdb$imdbRating, horror.imdb$imdbRating, music.imdb$imdbRating, musical.imdb$imdbRating, mystery.imdb$imdbRating, news.imdb$imdbRating, realitytv.imdb$imdbRating, names = c("History", "Horror", "Music", "Musical", "Mystery", "News", "Reality TV"), col = 2:8, xlab= "Genre", ylab = "IMDB Rating", main = "Genre vs. Rating")
+vioplot(romance.imdb$imdbRating, scifi.imdb$imdbRating, short.imdb$imdbRating, sport.imdb$imdbRating, talkshow.imdb$imdbRating, thriller.imdb$imdbRating, war.imdb$imdbRating, western.imdb$imdbRating, names = c("Romance", "Sci Fi", "Short", "Sport", "Talk Show", "Thriller", "War", "Western") ,col = 2:9, xlab= "Genre", ylab = "IMDB Rating", main = "Genre vs. Rating")
+
+#################################
+### End of Preliminary, Start of Regular
+#################################
+detach(imdb)
+```
+
+# D: Analysis
+
+### Tests of Independence
+
+Our first analysis involved the independence of different genre types.  We wanted to take a look to see if certain movie genres had any sort of overlap among one another.
+
+For example, the first example we looked at was Action movies vs. Adventure movies.  We hypothesized that there would be a dependence among these genres because many Action movies are also Adventure Movies.
+
+In order to test this, we took created a table of all the movies and separated them into movies that were either only Action, only Adventure, neither Action or Adventure and both Action and Adventure. Because each cell of this table is greater than 5, we were able to use a Chi-Squared Test.
+
+```{r, echo = FALSE}
+### Independence
+library(vioplot)
+attach(imdb)
+
+mytable.act.adv = xtabs(~ Action + Adventure, data =imdb)
+ctest.act.adv= chisq.test(mytable.act.adv)
+ctest.act.adv
+
+```
+
+The p-value is much less than 0.05, so we can conclude that Action and Adventure movies are dependent.
+
+The next comparison we looked at was the relationship between History movies and War movies.  Once again, all of the cells had a count of at least 5, so we were able to use the Chi-Squared Test.
+```{r, echo = FALSE}
+
+mytable.hist.war = xtabs(~ History + War, data = imdb)
+ctest.hist.war = chisq.test(mytable.hist.war)
+ctest.hist.war
+
+```
+
+Just as in the previous example, the p-value is much less than 0.05, so we Reject Ho and conclude that these two genres are dependent.
+
+We then wanted to take a look at two genres that seeminingly do not have any relationship in order to see what the test results would be.  The two genres we decided on were GameShow and Romance.  When we took a look at the table of the different counts of these genres, we observed that there were cells with counts less than 5, so we could not utilize the Chi-Squared Test.  Instead we used the Fisher Test, which does not have an assumption where each cell needs to be greater than 5.
+
+```{r,echo = FALSE}
+
+mytable.game.rom = xtabs(~ GameShow + Romance, data = imdb)
+fishtest.game.rom = fisher.test(mytable.game.rom)
+fishtest.game.rom
+
+```
+
+As expected, this test yielded a very high p-value of 1, which is greater than 0.05.  This means that we do not have enough evidence to Reject Ho and conclude that GameShow and Romance are independent.
+
+### Regression 
+
+```{r, echo =FALSE}
+
+#######################
+###### Regression
+#######################
+set.seed(123)
+
+imdb.min.3 = imdb[,3:39]
+n.imdb = nrow(imdb.min.3)
+imdb.index = sample(n.imdb, n.imdb*0.8)
+train.imdb = imdb.min.3[imdb.index,]
+test.imdb = imdb.min.3[-imdb.index,]
+n.imdb.train = nrow(train.imdb)
+n.imdb.test = nrow(test.imdb)
+
+```
+
+The next type of analysis we wanted to take a look at was Regression.  After taking a look at the data, we decided that two good problems to solve were to see which variables were good at predicting imdbRating and to see which variables were good at predicting the number of Awards that a particular movie wins.  We used several different techniques in this section including linear regression, subset selection and poisson regression.
+
+In order to look at look at potential predictions, we randomly divided the data and assigned 80% of the observations to the training set and the remaining 20% to the test set.  This leaves us with a training set of size 8370 and a test set of size 2093.  We also removed the variables "title", "url", and "Western".  "title" and "url" were removed because they cannot be used in a regression setting and "Western" was removed because with dummy variables, there needs to be a baseline where all other dummy variables equal 0.
+
+#### Predicting IMDB Rating
+
+The first step in the regression analysis is to take a look at the assumptions. The first one is the Normality of the Residuals, which is performed using the qqPlot() function.  The plot shows a bit of a curve at first, but ultimately it is linear enough in order to correctly assume normality of residuals.  The next plot is the Fitted Values vs. the Residuals.  There seems to be a pattern, but that may be due to the nature of the data and the overall size of it, so this is something that may become a problem with the model, but we will continue to fit the model.
+
+The next two graps show the Fitted Values vs. the Studentized Residuals.  This plot shows the same problem as before, there is a definite pattern and there are values outside of the dotted lines.  This certainly isn't ideal, but we need to fit the model.  The final plot is the Cook's Distance plot. Many pf the points are above the cutoff line, which is expected due to the sheer size of the data.  However, R only identifies the three most influential points which are: 6854, 503 and 3276.
+
+```{r, echo = FALSE}
+### Assumptions
+# Normality of Residuals
+library(car)
+library(carData)
+
+imdb.lin.full = lm(imdbRating~., data= train.imdb)
+summ.full= summary(imdb.lin.full)
+imdb.lin.full.pred = predict(imdb.lin.full, newdata = test.imdb)
+
+par(mfrow = c(1,2))
+qqPlot(summ.full$residuals, ylab = "Residuals")
+
+### Write that it looks linear --> Normal
+
+# Fitted vs. Residuals
+plot(imdb.lin.full$fitted.values, summ.full$residuals, xlab= "Fitted Values", ylab = "Residuals")
+abline(h=0, col =2, lwd = 2)
+
+# There seems to be a pattern, but that may be due to the nature of the data and the overall size of it
+
+### Studentized residuals vs. Fitted values
+z.full = rstudent(imdb.lin.full)
+plot(imdb.lin.full$fitted.values, z.full, xlab = "Fitted Values", ylab = "Stud. Residuals")
+abline(h=0,col=2,lwd=2)
+abline(h=2, col=3,lwd=2, lty=2)
+abline(h=-2,col=3,lwd=2, lty=2)
+
+# Write about the same problem as before, there is a definite pattern and there are values outside of the dotted lines.  THis certainly isn't ideal, but you need to go on
+
+### Cook's Distance
+cutoff <- 4/(nrow(train.imdb)-length(imdb.lin.full$coefficients))
+plot(imdb.lin.full, which=4, cook.levels=cutoff)
+abline(h=cutoff, lty=2, col="red")
+# Many points are above the cutoff line, which is expected due to the sheer size of the data.  However, R only identifies the three most influential points
+
+```
+
+The next step is to fit the model on the training data.  At first we fit the full model which uses all of the predictors, except for the three we removed during data preparation.  Using the lm() function, we were able to fit a linear regression model, find the summary of the coefficients and then use the predict() function to predict the imdbRating for the observations in the test set, as we have displayed the first couple predicted values.  Any coefficient that had a p-value greater than 0.05, was deemed significant and will be used in a reduced model, which will then be used to see if removing the non-significant predictors has an effect on the prediction capability of this model.  Overall, 19 of the predictors were significant.
+```{r,echo=FALSE}
+
+# Change to the full model.
+imdb.lin.full = lm(imdbRating~., data= train.imdb)
+summ.full= summary(imdb.lin.full)
+summ.full
+imdb.lin.full.pred = predict(imdb.lin.full, newdata = test.imdb)
+head(imdb.lin.full.pred)
+
+```
+
+#### Reduced IMDB Rating Model
+
+We then decided to fit a model using the 19 predictors that were deemed significant to see if there was any difference between this reduced model and the full model.  As with the full model, we want to take a look at the assumptions of the model.
+
+Just as before, the QQ-plot displays a curve at the beginning, but straightens out by the end and the Fitted Values vs. Residuals plot shows a pattern at the beginning.  The Fitted Values vs. Studentized Residuals show a similar pattern and have values outside of the green boundaries, but just as we did with the full model we will continue.  The Cook's Distance plot shows many influential points, but the three most influential observations are: 2017, 3276, 5704.
+
+```{r, echo = FALSE}
+
+#### Reduced Linear Fit
+
+imdb.lin.red = lm(imdbRating~ ratingCount + duration + year + nrOfWins + nrOfNominations + nrOfPhotos + nrOfUserReviews + Animation + Biography + Documentary + Drama + Family + GameShow + Horror + Mystery + SciFi + Short + TalkShow + War, data = train.imdb)
+summ.red = summary(imdb.lin.red)
+imdb.lin.red.pred = predict(imdb.lin.red, newdata = test.imdb)
+
+library(car)
+par(mfrow = c(1,2))
+qqPlot(summ.red$residuals, ylab = "Residuals")
+
+### Write that it looks linear enough --> Normal
+
+# Fitted vs. Residuals
+plot(imdb.lin.red$fitted.values, summ.red$residuals, xlab = "Fitted Values", ylab = "Residuals")
+abline(h=0, col =2, lwd = 2)
+
+# There's less of a pattern here that there was in the full model
+
+### Studentized residuals vs. Fitted values
+z.red = rstudent(imdb.lin.red)
+plot(imdb.lin.red$fitted.values, z.red, xlab = "Fitted Values", ylab = "Residuals")
+abline(h=0,col=2,lwd=2)
+abline(h=2, col=3,lwd=2, lty=2)
+abline(h=-2,col=3,lwd=2, lty=2)
+
+# Write about the same problem as before, the spread is very similar to the last residual plot, but there are values outside of the dotted lines.  This certainly isn't ideal, but this does a better job verifying the assumption that the full model did.
+
+### Cook's Distance
+cutoff <- 4/(nrow(train.imdb)-length(imdb.lin.red$coefficients))
+plot(imdb.lin.red, which=4, cook.levels=cutoff)
+abline(h=cutoff, lty=2, col="red")
+
+
+# Many points are above the cutoff line, which is expected due to the sheer size of the data.  However, R only identifies the three most influential points.  The variability in the Cook's distance is smaller than the full model.
+
+```
+
+The next step is to fit the reduced model and to predict using that model on the test set, the same 6 observations that were shown to predict the full model are also shown.
+
+```{r, echo =FALSE}
+
+imdb.lin.red = lm(imdbRating~ ratingCount + duration + year + nrOfWins + nrOfNominations + nrOfPhotos + nrOfUserReviews + Animation + Biography + Documentary + Drama + Family + GameShow + Horror + Mystery + SciFi + Short + TalkShow + War, data = train.imdb)
+summ.red = summary(imdb.lin.red)
+summ.red
+imdb.lin.red.pred = predict(imdb.lin.red, newdata = test.imdb)
+head(imdb.lin.red.pred)
+
+### Interpretation
+
+# Adjusted R^2 seems to favor the full model rather than the reduced, but it is not by much.  The reduced model did a better job with the assumptions and by the principle of parsimony, we probably want to use a simpler model with less predictors.
+```
+Now that we have the two models we would like to compare them in order to see if dropping the non-significant terms is a good idea.  We are able to do this via the anova() function because the two models are nested.
+
+```{r, echo = FALSE}
+
+anova(imdb.lin.red, imdb.lin.full)
+```
+
+#### Interpretation
+
+Adjusted R^2 seems to favor the full model rather than the reduced, but it is not by much.  The reduced model did a better job with the assumptions, but when we did the anova() test the p-value is less than 0.05, so we cannot justify dropping those terms from the model and conclude that the full model is better.
+
+### Predicting Number of Wins
+
+The next regression topic is very similar to the imdbRating model, but instead we are looking to see the differences in which variables are deemed significant in a linear regression model vs. a poisson regression model.  We decided to create two full models where we are trying to predict the Number of Awards Won by a particular movie, while using the rest of the variables as predictors.  We decided on using this setup for these regression models because the response variable (nrOfAwards) is an integer, which will work for Poisson Regression.
+
+Just as with the other linear regression model, we first have to look at the assumptions of the model.
+
+The qqPlot() of the residuals seems like it follows the form of a higher degree, which does not bode well with the linear shape we are hoping for in order to confirm this assumption.  The two plots of the Fitted Values vs. the Residual show a heavy pattern towards the left of the graph and then a large variance as the fitted values get larger, which is not ideal.  Finally, the Cook's Distance plot shows many influential observations, with the three most influential observations being: 224, 10539, and 6405.
+
+
+```{r, echo = FALSE}
+
+#################################
+
+
+### Wins Linear Regression
+
+imdb.lin.wins = lm(nrOfWins~., data=train.imdb)
+summ.win = summary(imdb.lin.wins)
+imdb.lin.wins.pred = predict(imdb.lin.wins, newdata = test.imdb)
+
+par(mfrow = c(1,2))
+qqPlot(summ.win$residuals, ylab = "Residuals")
+
+### Write that it looks linear --> Normal
+
+# Fitted vs. Residuals
+plot(imdb.lin.wins$fitted.values, summ.win$residuals, xlab= "Fitted Values", ylab = "Residuals")
+abline(h=0, col =2, lwd = 2)
+
+# There seems to be a pattern, but that may be due to the nature of the data and the overall size of it
+
+### Studentized residuals vs. Fitted values
+z.wins = rstudent(imdb.lin.wins)
+plot(imdb.lin.wins$fitted.values, z.wins, xlab = "Fitted Values", ylab = "Stud. Residuals")
+abline(h=0,col=2,lwd=2)
+abline(h=2, col=3,lwd=2, lty=2)
+abline(h=-2,col=3,lwd=2, lty=2)
+
+# Write about the same problem as before, there is a definite pattern and there are values outside of the dotted lines.  THis certainly isn't ideal, but you need to go on
+
+### Cook's Distance
+cutoff <- 4/(nrow(train.imdb)-length(imdb.lin.wins$coefficients))
+plot(imdb.lin.wins, which=4, cook.levels=cutoff)
+abline(h=cutoff, lty=2, col="red")
+
+
+```
+
+Despite many of the assumptions not looking like they were satisfied, we fit the model and here were the predictors that were significant.  In total, there were only 7 predictors with a p-value less than 0.05, which was much less than in the imdbRating regression model.
+
+```{r, echo = FALSE}
+summ.win
+```
+
+Our next step was to see which variables were deemed significant in predicting the number of wins a movie gets, but by using a poisson regression technique instead of a linear regression.
+
+The main assumption with poisson regression is there being a lack of overdispersion.  This indicator can be calculated by taking the deviance of a poisson model and dividing it by the residual degrees of freedom.  If this value is greater than 1, we instead fit a similar type of model called a quasipoisson model.  
+
+After fitting a poisson full model on the training set, here is what we observed:
+
+
+```{r, echo = FALSE}
+
+## Poisson Regression
+poiss.imdb = glm(nrOfWins~., data = train.imdb, family = poisson())
+summary(poiss.imdb)
+```
+
+This model has an overdispersion value of 3.74 > 1 and has a p-vale from the qcc.overdispersion test < 0.05, so we conclude that there is overdispersion and we need to fit a quasipoisson regression model instead.
+
+```{r, echo = FALSE}
+
+# Overdispersion
+deviance(poiss.imdb)/df.residual(poiss.imdb)
+
+library(qcc)
+qcc.overdispersion.test(train.imdb$nrOfWins, type= "poisson")
+
+```
+
+Now that we know, which type of model to fit, here is our results from the quasipoisson full model. As shown below, there are 22 significant predictors from using the poisson model, which is more than the 7 predictors used from the linear full model.
+
+```{r, echo = FALSE}
+
+#Quasipoisson model
+
+quasipoiss.imdb = glm(nrOfWins~., data = train.imdb, family = quasipoisson())
+summary(quasipoiss.imdb)
+
+```
+
+
+### ANOVA
+
+Our next form of analysis is to use ANOVA in order to observe patterns in mean Number of Awards Won, grouped by imdb Rating.
+
+The first step we have to perform is to create a new variable "rate", which takes value "Poor" if a movie's rating is less than 5, "Average" if the rating is between 5 and 7.5 and "Good" if it is greater than 7.5.  After creating this new variable, we need to convert it into a factor so that we can utilize the ANOVA procedure.  The following displays the number of movies of the entire dataset that fall into each category.
+
+```{r, echo = FALSE}
+### Group by Rating, compare mean number of wins
+
+imdb$rate=0
+imdb$rate[imdb$imdbRating<5] = "Poor"
+imdb$rate[imdb$imdbRating>=5 & imdb$imdbRating<7.5] = "Average"
+imdb$rate[imdb$imdbRating>=7.5]= "Good"
+imdb$rate = as.factor(imdb$rate)
+table(imdb$rate)
+```
+
+The next step is observe the difference in the summary statistics between the three groups of the new variable rate.  By observing the table below, we see that there is a clear difference in the mean number of awards won, with a large range of standard deviations amongst the three groups.  This leads us to believe that when we perform the ANOVA test, we will get a very small p-value and conclude that there is a signficant difference among rating groups.
+
+```{r, echo = FALSE}
+
+with(imdb,{
+  df = cbind(aggregate(nrOfWins, by = list(rate), FUN = mean),
+             aggregate(nrOfWins, by = list(rate), FUN = sd))
+df = df[,c(1,2,4)]
+colnames(df) = c("Rating Group", "Mean", "SD")
+df
+})
+
+```
+
+Before we fit the actual model, we first observe the two assumptions for this type of ANOVA model.  These assumptions are normality of the linear fit of the data and equal variance among the treatment groups.  The first assumption can be done with a qqPlot().  The plot below is mostly linear for the first part of the graph, before it curves sharply upwards.  This may indicate problems with the model, but we will continue.  The next assumption is conducted by the Bartlett Test of Homogeneity of Variances.  Because the p-value associated with this ANOVA problem is less than 0.05, we conclude that the variances among the treatment groups are not equal, which violates this assumption.
+
+```{r, echo=FALSE}
+
+par(mfrow = c(1,1))
+library(car)
+qqPlot(lm(nrOfWins~rate, data = imdb), simulate = TRUE, labels = FALSE)
+
+bartlett.test(nrOfWins ~ rate, data=imdb)
+
+```
+
+Regardless of the questionable validity of these assumptions, we go one to fit the ANOVA model.  The null hypothesis for this test is $H_{0}: \mu_{Poor} = \mu_{Average} = \mu_{Good}$ with $H_{a}: > 1 \mu_{j}$ is different.
+```{r, echo = FALSE}
+
+
+##### Test to see if there is a significant difference in mean awards won by rating group
+
+winANOVA = aov(nrOfWins ~ imdb$rate, data = imdb)
+summary(winANOVA)
+
+```
+
+As expected the p-value is very much below 0.05, so we Reject Ho and conclude that there is a difference among the mean number of awards between rating categories.
+
+### Classification
+
+The final method of statistical analysis we decided to perform was a decision tree. After looking at the data we decided to split the number of user reviews variable into a categorical variable of low and highly reviewed films and then used this new categorical variable to run a classification model on it to see what predictors were significant. We decided to use a tradtional decision tree to do this. 
+
+```{r, echo = FALSE}
+
+imdb = read.csv("imdb.csv")
+# See how many missing values there are
+na.imdb = na.omit(imdb)
+imdb= na.imdb
+
+############
+## Classification
+############
+
+##################
+
+## Decision Tree
+
+imdb$users.cat= rep("Less reviewed", length(imdb$nrOfUserReviews))
+imdb$users.cat[imdb$nrOfUserReviews> mean(imdb$nrOfUserReviews)] = "Highly reviewed"
+imdb$users.cat = as.factor(imdb$users.cat)
+table(imdb$users.cat)
+
+```
+
+After making the users categorical variable we split the imdb data into a trianing and validation set using 80% of the dataset for training. Then we fit the decision tree using duration, rating, year, number of wins, number of nomiations and number of genres as predictors.
+```{r,echo = FALSE}
+library(rpart)
+library(rpart.plot)
+
+set.seed(1234)
+train = sample(nrow(imdb), 0.8*nrow(imdb))
+imdb.train = imdb[train,]
+imdb.validate = imdb[-train,]
+table(imdb.train$users.cat)
+
+imdb.train = imdb[, -c(1,2,13:40)]
+head(imdb.train)
+
+
+users.dtree = rpart(users.cat~ duration+imdbRating+year+nrOfWins+nrOfGenre+nrOfNominations, data=imdb.train, method = "class", parms = list(split = "information"))
+users.dtree$cptable
+plotcp(users.dtree)
+
+prp(users.dtree, type = 2, extra = 104,
+fallen.leaves = TRUE, main="Decision Tree")
+
+```
+
+From the cptable we see that there are only two other branches so we decided to show the whole tree as pruning wasn't necessary. The tree shows that the number of nominations is significant in predicting whether a movie is highly reviewed or not.
+
+Looking at the prediction vs actual values table we see that the model is better at predicting less reviewed than highly reviewed movies.
+
+```{r, echo = FALSE}
+
+
+library(rpart)
+library(rpart.plot)
+
+## Predictions
+dtree.pred = predict(users.dtree, imdb.validate, type = "class")
+dtree.pref = table(imdb.validate$users.cat, dtree.pred, dnn = c("Actual", "Predicted"))
+dtree.pref
+
+```
+
+We then look at the performance which shows the model has an 80% accuracy although the specificity of the model is quite low. 
+
+```{r,echo = FALSE}
+
+####################################
+#performance function
+performance <- function(table, n=2){
+  if(!all(dim(table) == c(2,2)))
+    stop("Must be a 2 x 2 table")
+  tn = table[1,1]
+  fp = table[1,2]
+  fn = table[2,1]
+  tp = table[2,2]
+  sensitivity = tp/(tp+fn)
+  specificity = tn/(tn+fp)
+  ppp = tp/(tp+fp)
+  npp = tn/(tn+fn)
+  hitrate = (tp+tn)/(tp+tn+fp+fn)
+  result <- paste("Sensitivity = ", round(sensitivity, n) ,
+                  "\nSpecificity = ", round(specificity, n),
+                  "\nPositive Predictive Value = ", round(ppp, n),
+                  "\nNegative Predictive Value = ", round(npp, n),
+                  "\nAccuracy = ", round(hitrate, n), "\n", sep="")
+  cat(result)
+}
+#logistic model
+performance(dtree.pref)
+
+detach(imdb)
+
+
+
+
+
+```
+
+
+
+
+```{r, echo = FALSE, eval = FALSE}
+
+############
+## Classification
+############
+
+
+
+##################
+## NOT WORKING
+
+## Decision Tree
+imdb$win= rep("No Wins", length(nrOfWins))
+imdb$win[train.imdb$nrOfWins > 0] = "Winner"
+imdb$win = as.factor(imdb$win)
+table(imdb$win)
+
+set.seed(2)
+imdb.index = sample(n.imdb, n.imdb*0.8)
+train.imdb = imdb[imdb.index,]
+test.imdb = imdb[-imdb.index,]
+n.imdb.train = nrow(train.imdb)
+n.imdb.test = nrow(test.imdb)
+
+train.imdb = train.imdb[, -c(1,2,40)]
+
+imdb$rate.cat= rep("Below Average", length(imdbRating))
+imdb$rate.cat[train.imdb$imdbRating > mean(imdbRating)] = "Above Average"
+imdb$rate.cat = as.factor(imdb$rate.cat)
+table(imdb$rate.cat)
+
+set.seed(2)
+imdb.index = sample(n.imdb, n.imdb*0.8)
+train.imdb = imdb[imdb.index,]
+test.imdb = imdb[-imdb.index,]
+n.imdb.train = nrow(train.imdb)
+n.imdb.test = nrow(test.imdb)
+
+train.imdb = train.imdb[, -c(1,2,40)]
+
+library(rpart)
+library(rpart.plot)
+rate.dtree = rpart::rpart(rate.cat~ ratingCount+ duration+ year + nrOfWins, data = train.imdb, method = "class", parms = list(split = "information"))
+rate.dtree$cptable
+plotcp(rate.dtree)
+
+
+
+set.seed(123)
+win.dtree = rpart(win~ imdbRating + ratingCount+ duration+ year, data = train.imdb, method = "class", parms = list(split = "information"))
+win.dtree$cptable
+plotcp(win.dtree)
+
+prp(win.dtree, type = 2, extra = 104,
+fallen.leaves = TRUE, main="Decision Tree")
+
+## Predictions
+dtree.pred = predict(win.dtree, test.imdb, type = "class")
+dtree.pref = table(test.imdb$win, dtree.pred, dnn = c("Actual", "Predicted"))
+dtree.pref
+
+### log regression
+fit.logit = glm(win~., data=train.imdb, family = binomial())
+summary(fit.logit)
+
+####################################
+
+
+detach(imdb)
+```
+
+# E: Final Code:
+
+```{r, eval = FALSE}
+imdb = read.csv("imdb.csv")
+dim(imdb)
+
+# See how many missing values there are
+na.imdb = na.omit(imdb)
+dim(na.imdb)
+
+imdb= na.imdb
+summary(imdb[,3:12])
+
+#Histogram of imdbRating, duration, ratingCount,
+# year
+attach(imdb)
+par(mfrow = c(2,2))
+hist(imdbRating)
+abline(v=mean(imdbRating), col="red")
+hist(duration)
+abline(v=mean(duration), col = "red")
+hist(ratingCount)
+abline(v=mean(ratingCount), col = "red")
+hist(year)
+abline(v=mean(year), col = "red")
+
+# Scatterplots of two variables at a time
+par(mfrow=c(2,2))
+plot(ratingCount,imdbRating, xlab = "# of Rates", ylab = "IMDB Rating")
+plot(year, imdbRating, xlab = "Year", ylab = "IMDB Rating")
+plot(duration,imdbRating, xlab= "Duration", ylab = "IMDB Rating")
+plot(year,ratingCount, xlab = "Year", ylab= "Rating Count")
+
+#by genre
+action.imdb = imdb[imdb$Action == 1,]
+adult.imdb = imdb[imdb$Adult == 1,]
+adventure.imdb = imdb[imdb$Adventure == 1,]
+animation.imdb = imdb[imdb$Animation == 1,]
+biography.imdb = imdb[imdb$Biography == 1,]
+comedy.imdb = imdb[imdb$Comedy == 1,]
+crime.imdb = imdb[imdb$Crime == 1,]
+documentary.imdb = imdb[imdb$Documentary == 1,]
+drama.imdb = imdb[imdb$Drama == 1,]
+family.imdb = imdb[imdb$Family == 1,]
+fantasy.imdb = imdb[imdb$Fantasy == 1,]
+filmnoir.imdb = imdb[imdb$FilmNoir == 1,]
+gameshow.imdb = imdb[imdb$GameShow == 1,]
+history.imdb = imdb[imdb$History == 1,]
+horror.imdb = imdb[imdb$Horror == 1,]
+music.imdb = imdb[imdb$Music == 1,]
+musical.imdb = imdb[imdb$Musical == 1,]
+mystery.imdb = imdb[imdb$Mystery == 1,]
+news.imdb = imdb[imdb$News == 1,]
+realitytv.imdb = imdb[imdb$RealityTV == 1,]
+romance.imdb = imdb[imdb$Romance == 1,]
+scifi.imdb = imdb[imdb$SciFi == 1,]
+short.imdb = imdb[imdb$Short == 1,]
+sport.imdb = imdb[imdb$Sport == 1,]
+talkshow.imdb = imdb[imdb$TalkShow == 1,]
+thriller.imdb = imdb[imdb$Thriller == 1,]
+war.imdb = imdb[imdb$War == 1,]
+western.imdb = imdb[imdb$Western == 1,]
+
+# Violin plots of imdbRating by genre
+library(vioplot)
+par(mfrow=c(1,1))
+vioplot(action.imdb$imdbRating, adult.imdb$imdbRating, adventure.imdb$imdbRating, biography.imdb$imdbRating, comedy.imdb$imdbRating, crime.imdb$imdbRating, names = c("Action", "Adult", "Adventure", "Biography", "Comedy", "Crime"), col = 2:7, xlab= "Genre", ylab = "IMDB Rating", main = "Genre vs. Rating")
+vioplot(documentary.imdb$imdbRating, drama.imdb$imdbRating, family.imdb$imdbRating, fantasy.imdb$imdbRating, filmnoir.imdb$imdbRating, gameshow.imdb$imdbRating, names = c("Documentary", "Drama", "Family", "Fantasy", "Film Noir", "Game Show"), col = 2:7, xlab= "Genre", ylab = "IMDB Rating", main = "Genre vs. Rating")
+vioplot(history.imdb$imdbRating, horror.imdb$imdbRating, music.imdb$imdbRating, musical.imdb$imdbRating, mystery.imdb$imdbRating, news.imdb$imdbRating, realitytv.imdb$imdbRating, names = c("History", "Horror", "Music", "Musical", "Mystery", "News", "Reality TV"), col = 2:8, xlab= "Genre", ylab = "IMDB Rating", main = "Genre vs. Rating")
+vioplot(romance.imdb$imdbRating, scifi.imdb$imdbRating, short.imdb$imdbRating, sport.imdb$imdbRating, talkshow.imdb$imdbRating, thriller.imdb$imdbRating, war.imdb$imdbRating, western.imdb$imdbRating, names = c("Romance", "Sci Fi", "Short", "Sport", "Talk Show", "Thriller", "War", "Western") ,col = 2:9, xlab= "Genre", ylab = "IMDB Rating", main = "Genre vs. Rating")
+
+#################################
+### End of Preliminary, Start of Regular
+#################################
+detach(imdb)
+
+### Independence
+library(vioplot)
+attach(imdb)
+
+mytable.act.adv = xtabs(~ Action + Adventure, data =imdb)
+ctest.act.adv= chisq.test(mytable.act.adv)
+ctest.act.adv
+
+
+
+```
+
+
+
+
